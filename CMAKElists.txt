@@ -1,0 +1,64 @@
+cmake_minimum_required(VERSION 3.10)
+project(Slay)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -D_THREAD_SAFE --std=c++20")
+
+# Add the Homebrew prefix path
+set(CMAKE_PREFIX_PATH /opt/homebrew)
+
+file(GLOB Slay_SOURCES 
+    src/*.cpp)
+
+# Set Homebrew SDL2 paths explicitly
+set(SDL2_INCLUDE_DIR /opt/homebrew/include)  # Point to /opt/homebrew/include, not /opt/homebrew/include/SDL2
+set(SDL2_LIBRARY /opt/homebrew/lib/libSDL2.dylib)
+set(SDL2_IMAGE_LIBRARY /opt/homebrew/lib/libSDL2_image.dylib)
+set(SDL2_MIXER_LIBRARY /opt/homebrew/lib/libSDL2_mixer.dylib)
+set(SDL2_TTF_LIBRARY /opt/homebrew/lib/libSDL2_ttf.dylib)
+
+# Include directories
+include_directories(${SDL2_INCLUDE_DIR})  # This should find SDL2/SDL.h now
+include_directories(include/)
+
+# Add executable
+add_executable(Slay ${Slay_SOURCES})
+
+# Include directories for the target
+target_include_directories(Slay PRIVATE include/)
+
+# Check if the res directory exists
+if(EXISTS ${CMAKE_BINARY_DIR}/res)
+    message(STATUS "Directory res already exists. Checking for additional files.")
+    # List all files in the source and destination res directories
+    file(GLOB SOURCE_FILES ${CMAKE_SOURCE_DIR}/res/*)
+    file(GLOB DESTINATION_FILES ${CMAKE_BINARY_DIR}/res/*)
+
+    # Check for additional files
+    list(LENGTH SOURCE_FILES NUM_SOURCE_FILES)
+    list(LENGTH DESTINATION_FILES NUM_DESTINATION_FILES)
+
+    if(NUM_SOURCE_FILES GREATER NUM_DESTINATION_FILES)
+        message(STATUS "Found additional files. Copying new files.")
+        foreach(FILE ${SOURCE_FILES})
+            # Copy only if the file doesn't exist in the destination
+            get_filename_component(FILENAME ${FILE} NAME)
+            if(NOT EXISTS ${CMAKE_BINARY_DIR}/res/${FILENAME})
+                file(COPY ${FILE} DESTINATION ${CMAKE_BINARY_DIR}/res/)
+            endif()
+        endforeach()
+    else()
+        message(STATUS "No additional files to copy.")
+    endif()
+else()
+    message(STATUS "Directory res does not exist. Copying the entire directory.")
+    # Copy the entire res directory
+    file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR}/)
+endif()
+
+# Link SDL2 and its related libraries manually
+target_link_libraries(Slay PRIVATE ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_MIXER_LIBRARY} ${SDL2_TTF_LIBRARY})
+
+message(STATUS "SDL2 Include Dir: ${SDL2_INCLUDE_DIR}")
+message(STATUS "SDL2 Libraries: ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_MIXER_LIBRARY} ${SDL2_TTF_LIBRARY}")
