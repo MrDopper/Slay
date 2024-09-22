@@ -1,9 +1,12 @@
 #include "animation.h"
+#include <iostream>
+#include <stdexcept>
 
 Animation::Animation(string name)
 {
     this->name = name;
 }
+
 // Return the next frame number in the list.
 int Animation::getNextFrameNumber(int frameNumber)
 {
@@ -16,38 +19,44 @@ int Animation::getNextFrameNumber(int frameNumber)
         return 0;
     }
 }
+
 Frame *Animation::getNextFrame(Frame *frame)
 {
+    if (frame == nullptr)
+    {
+        return nullptr;
+    }
     return getFrame(getNextFrameNumber(frame->frameNumber));
 }
-// Returns the last frames number
+
+// Returns the last frame's number
 int Animation::getEndFrameNumber()
 {
-    return frames.size() - 1;
+    return frames.size() > 0 ? frames.size() - 1 : 0;
 }
-// get frame using frameNumber
+
+// Get frame using frameNumber
 Frame *Animation::getFrame(int frameNumber)
 {
-    if (frames.size() == 0)
+    if (frames.data())
     {
-        return NULL;
-    }
-    // point interator to first frame in the frames list
-    list<Frame>::iterator i = frames.begin();
+        if (frames.size() == 0 || frameNumber < 0 || frameNumber >= frames.size())
+        {
+            return nullptr;
+        }
 
-    int counter = 0;
+        // Point iterator to the first frame in the frames list
+        auto i = frames.begin();
 
-    for (counter = 0; counter < frameNumber && counter < frames.size() - 1; counter++)
-    {
-        // Make interator point to the next frame in the list
-        i++;
+        // Advance iterator to the desired frame number
+        std::advance(i, frameNumber);
+
+        // Return a pointer to the frame
+        return &(*i);
     }
-    // Make frame point to the frame inside of the list our interator in position at
-    //*i = gets frame at i's position in the list (de-referencing )
-    //& = get whatever memory address of whatever is on the right.(referencing)
-    Frame *frame = &(*i);
-    return frame;
+    return nullptr;
 }
+
 void Animation::loadAnimation(ifstream &file, list<DataGroupType> &groupTypes)
 {
     getline(file, name);

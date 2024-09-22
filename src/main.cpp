@@ -1,3 +1,4 @@
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -7,13 +8,15 @@
 #include "res_path.h"
 #include "drawing_functions.h"
 #include "Globals.h"
-using std::cout;
-using std::endl;
-using std::string;
+#include "hero.h"
+#include "AnimationSet.h"
+
+using std::cout, std::endl, std::string;
 
 /**
  * Shutdown SDL_mixer, SDL_ttf, SDL_image, and SDL
  */
+
 void SafeQuit()
 {
     Mix_CloseAudio();
@@ -99,6 +102,7 @@ int main(int argc, char *argv[])
 
     // Load a texture to draw
     cout << "Loading texture..." << endl;
+
     string resPath = getResourcePath(); // Assuming getResourcePath() returns the correct path
     SDL_Texture *texture = loadTexture(resPath + "map.png", Globals::renderer);
     if (!texture)
@@ -116,9 +120,21 @@ int main(int argc, char *argv[])
 
     // Run game loop for 5000 ticks
     cout << "Entering main loop..." << endl;
+    string fullPath = getResourcePath() + "hero.fdset";
+    std::ifstream file(fullPath);
+    if (!file)
+    {
+        std::cerr << "Failed to open file: " << fullPath << std::endl;
+    }
+    else
+    {
+        std::cout << "Successfully opened file: " << fullPath << std::endl;
+    }
+
     SDL_Event e;
     bool quit = false;
-    while (!quit && SDL_GetTicks() < 5000)
+
+    while (!quit)
     {
         while (SDL_PollEvent(&e))
         {
@@ -126,6 +142,17 @@ int main(int argc, char *argv[])
             {
                 quit = true;
             }
+            // if (e.type == SDL_KEYDOWN)
+            // {
+            //     switch (e.key.keysym.scancode)
+            //     {
+            //     case SDL_SCANCODE_ESCAPE:
+            //         quit = true;
+            //         break;
+            //     case SDL_SCANCODE_SPACE:
+            //         break;
+            //     }
+            // }
         }
 
         // Clear the screen
@@ -138,6 +165,10 @@ int main(int argc, char *argv[])
 
     // Cleanup resources
     cleanup(texture);
+
+    // Game game;
+    // game.update();
+
     cleanup(Globals::renderer);
     cleanup(window);
 
@@ -146,3 +177,179 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+// #include <SDL2/SDL.h>
+// #include <SDL2/SDL_image.h>
+// #include <iostream>
+// #include <vector>
+// #include <list>
+// #include "Globals.h"
+// #include "wall.h"
+// #include "AnimationSet.h"
+// #include "dataGroupType.h"
+// #include "cleanup.h"
+// #include "res_path.h"
+
+// // Assuming HitBox structure exists in your codebase
+// struct HitBox
+// {
+//     int x, y, width, height;
+// };
+
+// void loadWallData(const std::string &filePath, AnimationSet &wallAnimSet, std::vector<HitBox> &hitBoxes, int &damageValue)
+// {
+//     std::ifstream file(filePath);
+//     if (!file.is_open())
+//     {
+//         std::cerr << "Error: Failed to open animation file: " << filePath << std::endl;
+//         return;
+//     }
+
+//     std::string textureFile;
+//     std::string animationName;
+//     int animations, frames;
+
+//     // Start reading the wall.txt file
+//     if (!(file >> textureFile))
+//     {
+//         std::cerr << "Error: Failed to read texture file name from " << filePath << std::endl;
+//         return;
+//     }
+//     if (!(file >> animations >> animationName))
+//     {
+//         std::cerr << "Error: Failed to read animation count or name from " << filePath << std::endl;
+//         return;
+//     }
+//     if (!(file >> frames))
+//     {
+//         std::cerr << "Error: Failed to read number of frames from " << filePath << std::endl;
+//         return;
+//     }
+
+//     int clipX, clipY, clipW, clipH;
+//     int offsetX, offsetY;
+//     float duration;
+//     int collisionX, collisionY, collisionW, collisionH;
+
+//     // Read the rest of the animation details
+//     if (!(file >> clipX >> clipY >> clipW >> clipH))
+//     {
+//         std::cerr << "Error: Failed to read clip dimensions from " << filePath << std::endl;
+//         return;
+//     }
+//     if (!(file >> offsetX >> offsetY))
+//     {
+//         std::cerr << "Error: Failed to read offsets from " << filePath << std::endl;
+//         return;
+//     }
+//     if (!(file >> duration))
+//     {
+//         std::cerr << "Error: Failed to read frame duration from " << filePath << std::endl;
+//         return;
+//     }
+//     if (!(file >> collisionX >> collisionY >> collisionW >> collisionH))
+//     {
+//         std::cerr << "Error: Failed to read collision box dimensions from " << filePath << std::endl;
+//         return;
+//     }
+
+//     // Load the sprite sheet (wall.png)
+//     wallAnimSet.spriteSheet = IMG_LoadTexture(Globals::renderer, (getResourcePath() + textureFile).c_str());
+//     if (wallAnimSet.spriteSheet == nullptr)
+//     {
+//         std::cerr << "Failed to load sprite sheet: " << textureFile << " Error: " << IMG_GetError() << std::endl;
+//         return;
+//     }
+
+//     // Set up the hitbox from the collision box in the wall.txt
+//     HitBox hitBox = {collisionX, collisionY, collisionW, collisionH};
+//     hitBoxes.push_back(hitBox);
+
+//     // Set up groupTypes for loading animations
+//     std::list<DataGroupType> groupTypes;
+
+//     DataGroupType colBoxType;
+//     colBoxType.groupName = "collisionBox";
+//     colBoxType.dataType = DataGroupType::DATATYPE_BOX;
+
+//     DataGroupType hitBoxType;
+//     hitBoxType.groupName = "hitBox";
+//     hitBoxType.dataType = DataGroupType::DATATYPE_BOX;
+
+//     DataGroupType dmgType;
+//     dmgType.groupName = "damage";
+//     dmgType.dataType = DataGroupType::DATATYPE_NUMBER;
+
+//     groupTypes.push_back(colBoxType);
+//     groupTypes.push_back(hitBoxType);
+//     groupTypes.push_back(dmgType);
+
+//     wallAnimSet.loadAnimationSet(filePath, groupTypes, true, 0, false);
+
+//     std::cout << "Wall data loaded successfully from " << filePath << std::endl;
+// }
+
+// int main(int argc, char *argv[])
+// {
+//     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
+//     {
+//         std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+//         return 1;
+//     }
+
+//     SDL_Window *window = SDL_CreateWindow("Wall Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Globals::ScreenWidth * Globals::ScreenScale, Globals::ScreenHeight * Globals::ScreenScale, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+//     if (!window)
+//     {
+//         std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+//         SDL_Quit();
+//         return 1;
+//     }
+
+//     Globals::renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+//     if (!Globals::renderer)
+//     {
+//         std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+//         SDL_DestroyWindow(window);
+//         SDL_Quit();
+//         return 1;
+//     }
+
+//     std::vector<HitBox> hitBoxes;
+//     int damageValue = 0;
+//     std::string resPath = getResourcePath();
+//     AnimationSet wallAnimSet;
+
+//     loadWallData(resPath + "wall.txt", wallAnimSet, hitBoxes, damageValue);
+
+//     // Create a Wall object using the loaded animation set
+//     Wall wall(&wallAnimSet);
+//     wall.x = 100; // Set X position
+//     wall.y = 100; // Set Y position
+
+//     bool quit = false;
+//     SDL_Event event;
+//     while (!quit)
+//     {
+//         while (SDL_PollEvent(&event))
+//         {
+//             if (event.type == SDL_QUIT)
+//             {
+//                 quit = true;
+//             }
+//         }
+
+//         SDL_SetRenderDrawColor(Globals::renderer, 0, 0, 0, 255);
+//         SDL_RenderClear(Globals::renderer);
+
+//         // Draw the wall
+//         wall.draw();
+
+//         SDL_RenderPresent(Globals::renderer);
+//     }
+
+//     SDL_DestroyRenderer(Globals::renderer);
+//     SDL_DestroyWindow(window);
+//     SDL_Quit();
+
+//     return 0;
+// }

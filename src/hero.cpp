@@ -46,6 +46,13 @@ Hero::Hero(AnimationSet *animSet)
 
     updateCollisionBox();
 }
+
+Hero::~Hero()
+{
+    // Clean up any resources if necessary
+    delete animSet;
+}
+
 void Hero::update()
 {
     // check if dead
@@ -66,6 +73,7 @@ void Hero::update()
     updateAnimation();
     updateInvincibleTimer();
 }
+
 void Hero::slash()
 {
     if (hp > 0 && (state == HERO_STATE_MOVE || state == HERO_STATE_IDLE))
@@ -76,6 +84,7 @@ void Hero::slash()
         // TODO add attack sound!
     }
 }
+
 void Hero::dash()
 {
     if (hp > 0 && (state == HERO_STATE_MOVE || state == HERO_STATE_IDLE))
@@ -92,11 +101,13 @@ void Hero::dash()
         // TODO add dash sound!
     }
 }
+
 void Hero::die()
 {
     moving = false;
     changeAnimation(HERO_STATE_DEAD, true);
 }
+
 void Hero::revive()
 {
     hp = hpMax;
@@ -106,6 +117,7 @@ void Hero::revive()
     y = Globals::ScreenHeight / 2;
     slideAmount = 0;
 }
+
 void Hero::changeAnimation(int newState, bool resetFrameToBeginning)
 {
     state = newState;
@@ -159,15 +171,16 @@ void Hero::changeAnimation(int newState, bool resetFrameToBeginning)
         currentAnim = animSet->getAnimation(HERO_ANIM_DIE);
     }
 
-    if (resetFrameToBeginning)
+    if (resetFrameToBeginning && currentAnim != nullptr)
         currentFrame = currentAnim->getFrame(0);
-    else
+    else if (currentFrame != nullptr && currentAnim != nullptr)
         currentFrame = currentAnim->getFrame(currentFrame->frameNumber);
 }
+
 void Hero::updateAnimation()
 {
-    if (currentFrame == NULL || currentAnim == NULL)
-        return; // cant do much with animations without pointers pointing to them :S
+    if (currentFrame == nullptr || currentAnim == nullptr)
+        return; // can't do much with animations without pointers pointing to them :S
 
     // if state says moving, but we're not, then change state/anim to idle
     if (state == HERO_STATE_MOVE && !moving)
@@ -206,6 +219,7 @@ void Hero::updateAnimation()
         frameTimer = 0;
     }
 }
+
 void Hero::updateDamages()
 {
     if (active && hp > 0 && invincibleTimer <= 0)
@@ -215,9 +229,9 @@ void Hero::updateDamages()
             if ((*entity)->active && (*entity)->type == "enemy")
             {
                 // we know enemies are living entities, so cast it to that
-                LivingEntity *enemy = (LivingEntity *)(*entity);
+                LivingEntity *enemy = dynamic_cast<LivingEntity *>(*entity);
 
-                if (enemy->damage > 0 && Entity::checkCollision(collisionBox, enemy->hitBox))
+                if (enemy != nullptr && enemy->damage > 0 && Entity::checkCollision(collisionBox, enemy->hitBox))
                 {
                     hp -= enemy->damage;
 
@@ -228,7 +242,7 @@ void Hero::updateDamages()
                         // TODO play getting hit sound
                     }
 
-                    slideAngle = Entity::anglebetweenTwoEntities((*entity), this);
+                    slideAngle = Entity::anglebetweenTwoEntities(*entity, this);
                     slideAmount = 200;
                 }
             }

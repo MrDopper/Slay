@@ -33,6 +33,7 @@ public:
     static const int HERO_STATE_DEAD;
 
     Hero(AnimationSet *animSet);
+    ~Hero();
     void update();
     void slash();
     void dash();

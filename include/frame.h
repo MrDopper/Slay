@@ -2,6 +2,7 @@
 #define FRAME_H
 #include <iostream>
 #include <list>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <SDL2/SDL.h>

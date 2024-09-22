@@ -30,11 +30,11 @@ Game::Game()
 
     // Set up the animation for hero
     heroAnimate = new AnimationSet();
-    heroAnimate->loadAnimationSet("udemyCyborg.fdset", dataGroupTypes, true, 0, true);
+    heroAnimate->loadAnimationSet("hero.text", dataGroupTypes, true, 0, true);
 
     // Set up the loading screen for wall
     wallAnimate = new AnimationSet();
-    wallAnimate->loadAnimationSet("wall.fdset", dataGroupTypes);
+    wallAnimate->loadAnimationSet("wall.txt", dataGroupTypes);
 
     hero = new Hero(heroAnimate);
     hero->invincibleTimer = 0;
@@ -82,12 +82,14 @@ Game::Game()
         Entity::entities.push_back(newWall);
     }
 }
+
 Game::~Game()
 {
     cleanup(backgroundImage);
     Entity::removeAllFromList(&Entity::entities, false);
     delete heroAnimate;
     delete wallAnimate;
+
     delete hero;
 
     Entity::removeAllFromList(&walls, true);

@@ -10,7 +10,7 @@ public:
     // Name of animation
     string name;
     // list out of frames
-    list<Frame> frames;
+    vector<Frame> frames;
 
     Animation(string name = " ");
     // Return the next frame number in the list.

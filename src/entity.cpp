@@ -238,7 +238,7 @@ bool Entity::checkCollision(SDL_Rect cbox1, SDL_Rect cbox2)
 }
 int Entity::angleToDirection(float angle)
 {
-    if ((angle >= 0 && angle <= 45) || angle >= 315 && angle <= 360)
+    if ((angle >= 0 && angle <= 45) || (angle >= 315 && angle <= 360))
         return DIRECT_RIGHT;
     else if (angle >= 45 && angle <= 135)
         return DIRECT_DOWN;

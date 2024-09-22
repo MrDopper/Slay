@@ -6,7 +6,7 @@
 #include "drawing_functions.h"
 #include "Globals.h"
 #include "keyboardInput.h"
-
+#include "group.h"
 class Game
 {
 public:
